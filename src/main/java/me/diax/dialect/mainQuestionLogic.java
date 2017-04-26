@@ -18,21 +18,6 @@ public class mainQuestionLogic {
     private static String[] punctuationList = {
         ".", ",", "[", "]", "|", "\"", "'", "{", "}", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "+", "=", "<", ">", "~", "`", "\\", "/", "?", ";", ":"
     };
-    public static void readDatabase() {
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/diaxdialect", "diaxdialect", "diaxDialect");
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("select * from messages");
-            while (rs.next()){
-                System.out.println(rs.getInt(1) + " - " + rs.getString(2));
-            }
-            con.close();
-        }
-        catch (Exception e) {
-            System.out.println(e.toString());
-        }
-    }
     public static int findBestMatch(String input) {
         int bestMatchId = 0;
         int bestMatchWordAmount = -1;
