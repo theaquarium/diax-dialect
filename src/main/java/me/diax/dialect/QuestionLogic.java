@@ -3,7 +3,7 @@ import java.sql.*;
 import java.util.Arrays;
 import java.util.List;
 
-public class mainQuestionLogic {
+public class QuestionLogic {
     private static String[] stopWordsList = {
         "without", "see", "unless", "due", "also", "must", "might", "like", "will", "may", "can", "much",
         "every", "the", "in", "other", "this", "the", "many", "any", "an", "or", "for", "in", "is", "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't", "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by", "can't", "cannot", "could",
