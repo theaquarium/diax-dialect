@@ -1,22 +1,11 @@
 package me.diax.dialect;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.sql.*;
+import java.util.Arrays;
+import java.util.LinkedList;
 
-public class Trainer {
-    public static String readConsole() throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        return br.readLine();
-    }
-
-    public static String train2(String input) throws IOException {
-        String output = API.ask(input);
-        return output;
-    }
-
-    public static void createDependenciesAndIncrement(String response, String originalInput) {
+class Trainer {
+    static void createDependenciesAndIncrement(String response, String originalInput) {
         int originalInputId = databaseContains(originalInput);
         if (originalInputId == -1) {
             originalInputId = createMessageRow(originalInput);
@@ -35,7 +24,8 @@ public class Trainer {
         System.out.println("Recorded!");
     }
 
-    public static String train3(String input, String originalInput, String response) throws IOException {
+
+    String train(String input, String originalInput, String response) {
         String result = "";
         if (input.equals("yes")) {
             createDependenciesAndIncrement(response, originalInput);
@@ -47,22 +37,15 @@ public class Trainer {
         return result;
     }
 
-    public static void train4(String proposedResponse, String originalInput) throws IOException {
-        createDependenciesAndIncrement(proposedResponse, originalInput);
-    }
-
-    private static int databaseContains(String input) {
+    static int databaseContains(String input) {
         int output = -1;
         try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/diaxdialect", "diaxdialect", "diaxDialect");
-            PreparedStatement stmt = con.prepareStatement("select id from messages where text=?");
-            stmt.setString(1, input);
-            ResultSet rs = stmt.executeQuery();
+            ResultSetBundle bundle = DatabaseOperations.query("select id from messages where text=?", new LinkedList<Object>(Arrays.asList(input)));
+            ResultSet rs = bundle.getResultSet();
             if (rs.next()) {
                 output = rs.getInt(1);
             }
-            con.close();
+            bundle.closeAll();
         }
         catch (Exception e) {
             System.out.println(e.toString());
@@ -70,7 +53,7 @@ public class Trainer {
         return output;
     }
 
-    private static int isLinked(int id1, int id2) {
+    static int isLinked(int id1, int id2) {
         int output = -1;
         try {
             Class.forName("com.mysql.jdbc.Driver");
@@ -88,43 +71,28 @@ public class Trainer {
         return output;
     }
 
-    private static void incrementWeight(int input) {
+    static void incrementWeight(int input) {
         try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/diaxdialect", "diaxdialect", "diaxDialect");
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("select * from links where id='" + input + "'");
-            if (rs.next()) {
-                stmt.executeUpdate("update links set weight = weight + 1 where id='" +  input + "'");
-            }
-            con.close();
+            DatabaseOperations.update("update links set weight = weight + 1 where id='" +  input + "'", null);
         }
         catch (Exception e) {
             System.out.println(e.toString());
         }
     }
 
-    private static void createLink(int id1, int id2) {
+    static void createLink(int id1, int id2) {
         try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/diaxdialect", "diaxdialect", "diaxDialect");
-            Statement stmt = con.createStatement();
-            stmt.executeUpdate("insert into links (input_id, output_id, weight) values(" + id1 +", " + id2 + ", 0)");
-            con.close();
+            DatabaseOperations.update("insert into links (input_id, output_id, weight) values(" + id1 +", " + id2 + ", 0)", null);
         }
         catch (Exception e) {
             System.out.println(e.toString());
         }
     }
 
-    private static int createMessageRow(String input) {
+    static int createMessageRow(String input) {
         int output = -1;
         try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/diaxdialect", "diaxdialect", "diaxDialect");
-            PreparedStatement stmt = con.prepareStatement("insert into messages (text) values(?)");
-            stmt.setString(1, input);
-            stmt.executeUpdate();
+            DatabaseOperations.update("insert into messages (text) values(?)", new LinkedList<Object>(Arrays.asList(input)));
             output = databaseContains(input);
         }
         catch (Exception e) {

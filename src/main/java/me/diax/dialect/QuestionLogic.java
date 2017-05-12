@@ -1,6 +1,7 @@
 package me.diax.dialect;
 import java.sql.*;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 public class QuestionLogic {
@@ -22,66 +23,43 @@ public class QuestionLogic {
         int bestMatchId = 0;
         int bestMatchWordAmount = -1;
         try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/diaxdialect", "diaxdialect", "diaxDialect");
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("select * from messages");
+            String[] inputNoStopWords = removeStopWords(input);
+            ResultSetBundle bundle = DatabaseOperations.query("select m.* from messages m left outer join links l on m.id = l.input_id", null);
+            ResultSet rs = bundle.getResultSet();
             while (rs.next()) {
                 int id = rs.getInt(1);
                 String text = rs.getString(2);
-                if (isInput(id)) {
-                    if (text.equals(input)) {
+                if (text.equals(input)) {
+                    bestMatchId = id;
+                    break;
+                } else {
+                    String[] thisNoStopWords = removeStopWords(text);
+                    int thisWordAmount = 0;
+                    for(String el : inputNoStopWords) {
+                        if(Arrays.asList(thisNoStopWords).contains(el)){
+                            thisWordAmount++;
+                            List<String> listNoStopWords = new LinkedList<String>(Arrays.asList(thisNoStopWords));
+                            int index = listNoStopWords.indexOf(el);
+                            listNoStopWords.remove(index);
+                            listNoStopWords.toArray(thisNoStopWords);
+                        }
+                    }
+                    if (thisWordAmount > bestMatchWordAmount) {
+                        bestMatchWordAmount = thisWordAmount;
                         bestMatchId = id;
-                        break;
-                    } else {
-                        String inputNoStopWords = removeStopWords(input);
-                        String thisNoStopWords = removeStopWords(text);
-                        String[] inputNoStopWordsArray = inputNoStopWords.split(" ");
-                        String[] thisNoStopWordsArray = thisNoStopWords.split(" ");
-                        int thisWordAmount = 0;
-                        for(String el : inputNoStopWordsArray) {
-                            if(Arrays.asList(thisNoStopWordsArray).contains(el)){
-                                thisWordAmount++;
-                                List<String> listNoStopWords = Arrays.asList(thisNoStopWordsArray);
-                                listNoStopWords.remove(el);
-                                listNoStopWords.toArray(thisNoStopWordsArray);
-                            }
-                        }
-                        if (thisWordAmount > bestMatchWordAmount) {
-                            bestMatchWordAmount = thisWordAmount;
-                            bestMatchId = id;
-                        }
                     }
                 }
             }
-            con.close();
+            bundle.closeAll();
         }
         catch (Exception e) {
             System.out.println(e.toString());
+            e.printStackTrace();
         }
         return bestMatchId;
     }
-    private static boolean isInput(int input) {
-        boolean result = false;
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/diaxdialect", "diaxdialect", "diaxDialect");
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("select * from links");
-            while (rs.next()){
-                int rsInput = rs.getInt(2);
-                if (rsInput == input) {
-                    result = true;
-                }
-            }
-            con.close();
-        }
-        catch (Exception e) {
-            System.out.println(e.toString());
-        }
-        return result;
-    }
-    private static String removeStopWords(String input) {
+
+    private static String[] removeStopWords(String input) {
         String output;
         String[] words = input.split(" ");
         StringBuilder outputBuilder = new StringBuilder();
@@ -102,8 +80,10 @@ public class QuestionLogic {
         }
         output = output.replaceAll("[ ]{2,}", " ");
         output = output.trim();
-        return output;
+        String[] outputArray = output.split(" ");
+        return outputArray;
     }
+
     public static String getOutputFromId(int input) {
         String output = "";
         int bestOutputId = 0;
@@ -112,29 +92,24 @@ public class QuestionLogic {
             Class.forName("com.mysql.jdbc.Driver");
             Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/diaxdialect", "diaxdialect", "diaxDialect");
             Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("select * from links");
+            ResultSet rs = stmt.executeQuery("select * from links where input_id=" + input);
             while (rs.next()){
-                int inputId = rs.getInt(2);
                 int outputId = rs.getInt(3);
                 int weight = rs.getInt(4);
-                if (inputId == input && weight > bestOutputWeight) {
+                if (weight > bestOutputWeight) {
                     bestOutputId = outputId;
                     bestOutputWeight = weight;
                 }
             }
-            ResultSet rs2 = stmt.executeQuery("select * from messages");
-            while (rs2.next()){
-                int id = rs2.getInt(1);
-                String text = rs2.getString(2);
-                if (id == bestOutputId) {
-                    output = text;
-                    break;
-                }
+            ResultSet rs2 = stmt.executeQuery("select * from messages where id=" + bestOutputId);
+            if (rs2.next()){
+                output = rs2.getString(2);
             }
             con.close();
         }
         catch (Exception e) {
             System.out.println(e.toString());
+            e.printStackTrace();
         }
         return output;
     }
