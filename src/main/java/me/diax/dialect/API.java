@@ -1,8 +1,10 @@
 package me.diax.dialect;
 
 public class API {
-    public static String ask(String input) {
-        int id = QuestionLogic.findBestMatch(input);
-        return QuestionLogic.getOutputFromId(id);
+    public String ask(String input) {
+        DatabaseOperations databaseOps = DatabaseOperations.getInstance();
+        int id = databaseOps.findBestMatch(input);
+        return databaseOps.getOutputFromId(id);
     }
+
 }

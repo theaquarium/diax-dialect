@@ -19,47 +19,8 @@ public class QuestionLogic {
     private static String[] punctuationList = {
         ".", ",", "[", "]", "|", "\"", "'", "{", "}", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "+", "=", "<", ">", "~", "`", "\\", "/", "?", ";", ":"
     };
-    public static int findBestMatch(String input) {
-        int bestMatchId = 0;
-        int bestMatchWordAmount = -1;
-        try {
-            String[] inputNoStopWords = removeStopWords(input);
-            ResultSetBundle bundle = DatabaseOperations.query("select m.* from messages m left outer join links l on m.id = l.input_id", null);
-            ResultSet rs = bundle.getResultSet();
-            while (rs.next()) {
-                int id = rs.getInt(1);
-                String text = rs.getString(2);
-                if (text.equals(input)) {
-                    bestMatchId = id;
-                    break;
-                } else {
-                    String[] thisNoStopWords = removeStopWords(text);
-                    int thisWordAmount = 0;
-                    for(String el : inputNoStopWords) {
-                        if(Arrays.asList(thisNoStopWords).contains(el)){
-                            thisWordAmount++;
-                            List<String> listNoStopWords = new LinkedList<String>(Arrays.asList(thisNoStopWords));
-                            int index = listNoStopWords.indexOf(el);
-                            listNoStopWords.remove(index);
-                            listNoStopWords.toArray(thisNoStopWords);
-                        }
-                    }
-                    if (thisWordAmount > bestMatchWordAmount) {
-                        bestMatchWordAmount = thisWordAmount;
-                        bestMatchId = id;
-                    }
-                }
-            }
-            bundle.closeAll();
-        }
-        catch (Exception e) {
-            System.out.println(e.toString());
-            e.printStackTrace();
-        }
-        return bestMatchId;
-    }
 
-    private static String[] removeStopWords(String input) {
+    static String[] removeStopWords(String input) {
         String output;
         String[] words = input.split(" ");
         StringBuilder outputBuilder = new StringBuilder();
@@ -80,37 +41,32 @@ public class QuestionLogic {
         }
         output = output.replaceAll("[ ]{2,}", " ");
         output = output.trim();
-        String[] outputArray = output.split(" ");
-        return outputArray;
+        return output.split(" ");
     }
 
-    public static String getOutputFromId(int input) {
-        String output = "";
-        int bestOutputId = 0;
-        int bestOutputWeight = -1;
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/diaxdialect", "diaxdialect", "diaxDialect");
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("select * from links where input_id=" + input);
-            while (rs.next()){
-                int outputId = rs.getInt(3);
-                int weight = rs.getInt(4);
-                if (weight > bestOutputWeight) {
-                    bestOutputId = outputId;
-                    bestOutputWeight = weight;
+    public static LinkedList<Integer> findBestMatchLogic(String text, int id, int bestMatchWordAmount, String originalInput, String[] inputNoStopWords) {
+        LinkedList<Integer> arrayOutput = null;
+        if (text.equals(originalInput)) {
+            arrayOutput = new LinkedList<>();
+            arrayOutput.add(id);
+        } else {
+            String[] thisNoStopWords = removeStopWords(text);
+            int thisWordAmount = 0;
+            for(String el : inputNoStopWords) {
+                if(Arrays.asList(thisNoStopWords).contains(el)){
+                    thisWordAmount++;
+                    List<String> listNoStopWords = new LinkedList<String>(Arrays.asList(thisNoStopWords));
+                    int index = listNoStopWords.indexOf(el);
+                    listNoStopWords.remove(index);
+                    listNoStopWords.toArray(thisNoStopWords);
                 }
             }
-            ResultSet rs2 = stmt.executeQuery("select * from messages where id=" + bestOutputId);
-            if (rs2.next()){
-                output = rs2.getString(2);
+            if (thisWordAmount > bestMatchWordAmount) {
+                arrayOutput = new LinkedList<>();
+                arrayOutput.add(id);
+                arrayOutput.add(thisWordAmount);
             }
-            con.close();
         }
-        catch (Exception e) {
-            System.out.println(e.toString());
-            e.printStackTrace();
-        }
-        return output;
+        return arrayOutput;
     }
 }
