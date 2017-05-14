@@ -1,10 +1,9 @@
 package me.diax.dialect;
-import java.sql.*;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-public class QuestionLogic {
+class QuestionLogic {
     private static String[] stopWordsList = {
         "without", "see", "unless", "due", "also", "must", "might", "like", "will", "may", "can", "much",
         "every", "the", "in", "other", "this", "the", "many", "any", "an", "or", "for", "in", "is", "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't", "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by", "can't", "cannot", "could",
@@ -44,7 +43,7 @@ public class QuestionLogic {
         return output.split(" ");
     }
 
-    public static LinkedList<Integer> findBestMatchLogic(String text, int id, int bestMatchWordAmount, String originalInput, String[] inputNoStopWords) {
+    static LinkedList<Integer> findBestMatchLogic(String text, int id, int bestMatchWordAmount, String originalInput, String[] inputNoStopWords) {
         LinkedList<Integer> arrayOutput = null;
         if (text.equals(originalInput)) {
             arrayOutput = new LinkedList<>();
@@ -55,7 +54,7 @@ public class QuestionLogic {
             for(String el : inputNoStopWords) {
                 if(Arrays.asList(thisNoStopWords).contains(el)){
                     thisWordAmount++;
-                    List<String> listNoStopWords = new LinkedList<String>(Arrays.asList(thisNoStopWords));
+                    List<String> listNoStopWords = new LinkedList<>(Arrays.asList(thisNoStopWords));
                     int index = listNoStopWords.indexOf(el);
                     listNoStopWords.remove(index);
                     listNoStopWords.toArray(thisNoStopWords);

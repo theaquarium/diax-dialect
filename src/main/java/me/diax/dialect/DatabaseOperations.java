@@ -107,6 +107,8 @@ class DatabaseOperations {
                     }
                 }
             }
+            rs.close();
+            stmt.close();
             con.close();
         }
         catch (Exception e) {

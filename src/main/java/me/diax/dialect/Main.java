@@ -15,7 +15,7 @@ public class Main {
         return datasource;
     }
 
-    public static String readConsole() throws IOException {
+    private static String readConsole() throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         return br.readLine();
     }
@@ -24,9 +24,6 @@ public class Main {
         ClassLoader cl = Main.class.getClassLoader();
         DatabaseProperties properties = ConfigurationUtils.loadConfiguration(cl, "database.properties", ConfigurationUtils.getDataFolder(), DatabaseProperties.class);
         datasource = new DatabaseConnectionPool(properties);
-        DatabaseOperations databaseOps = DatabaseOperations.getInstance();
-        Trainer trainer = new Trainer(databaseOps);
-        API api = new API();
         System.out.println("Enter 'train' to begin training or 'ask' to ask \n");
         String train = readConsole().toLowerCase();
         while (!train.equals("train") && !train.equals("ask")) {
@@ -36,25 +33,27 @@ public class Main {
         if (train.equals("train")) {
             System.out.println("Enter a message: \n");
             String originalInput = readConsole();
-            String output = api.ask(originalInput);
+            String output = API.ask(originalInput);
             System.out.println(output);
             System.out.println("Is this a good response for your message (yes or no)?\n");
-            String goodResponse = readConsole().toLowerCase();
-            while (!goodResponse.equals("yes") && !goodResponse.equals("no")) {
+            String isGoodResponse = readConsole().toLowerCase();
+            while (!isGoodResponse.equals("yes") && !isGoodResponse.equals("no")) {
                 System.out.println("Please say 'yes' or 'no':\n");
-                goodResponse = readConsole().toLowerCase();
+                isGoodResponse = readConsole().toLowerCase();
             }
-            String result = trainer.train(goodResponse, originalInput, output);
-            if (result.equals("askResponse")) {
+            if (isGoodResponse.equals("yes")) {
+                API.createDependenciesAndIncrement(originalInput, output);
+            }
+            else {
                 System.out.println("What is a good answer for your message?\n");
                 String proposedResponse = readConsole();
-                trainer.createDependenciesAndIncrement(proposedResponse, originalInput);
+                API.createDependenciesAndIncrement(proposedResponse, originalInput);
             }
         }
         if (train.equals("ask")) {
             System.out.println("Enter a message: \n");
             String originalInput = readConsole();
-            System.out.println(api.ask(originalInput));
+            System.out.println(API.ask(originalInput));
         }
     }
 }

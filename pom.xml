@@ -15,6 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <dropwizard.version>1.1.0</dropwizard.version>
     </properties>
 
     <repositories>
@@ -22,6 +23,12 @@
             <id>knockturn-public</id>
             <name>Knockturn Public Repository</name>
             <url>https://repo.knockturnmc.com/content/repositories/knockturn-public/</url>
+        </repository>
+        <repository>
+            <id>maven2-repository.java.net</id>
+            <name>Java.net Repository for Maven</name>
+            <url>http://download.java.net/maven/2/</url>
+            <layout>default</layout>
         </repository>
     </repositories>
 
@@ -62,6 +69,17 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>5.1.40</version>
+        </dependency>
+        <!-- RESTful API Libraries -->
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-server</artifactId>
+            <version>1.8</version>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-core</artifactId>
+            <version>${dropwizard.version}</version>
         </dependency>
     </dependencies>
 
