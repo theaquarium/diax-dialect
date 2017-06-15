@@ -1,4 +1,4 @@
-package me.diax.dialect;
+package com.aquariumpain.dialect.database;
 
 import com.knockturnmc.api.util.sql.SqlDatasource;
 import com.zaxxer.hikari.HikariConfig;
@@ -7,12 +7,13 @@ import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-class DatabaseConnectionPool implements SqlDatasource {
+public class DatabaseConnectionPool implements SqlDatasource {
 
     private final HikariDataSource dataSource;
 
     public DatabaseConnectionPool(DatabaseProperties properties) {
         HikariConfig hikariConfig = new HikariConfig();
+        hikariConfig.setDriverClassName("com.mysql.jdbc.Driver");
         hikariConfig.setJdbcUrl(properties.getDatasourceUrl());
         hikariConfig.setUsername(properties.getDatasourceUser());
         hikariConfig.setPassword(properties.getDatasourcePassword());

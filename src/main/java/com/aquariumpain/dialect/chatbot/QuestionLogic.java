@@ -1,9 +1,9 @@
-package me.diax.dialect;
+package com.aquariumpain.dialect.chatbot;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-class QuestionLogic {
+public class QuestionLogic {
     private static String[] stopWordsList = {
         "without", "see", "unless", "due", "also", "must", "might", "like", "will", "may", "can", "much",
         "every", "the", "in", "other", "this", "the", "many", "any", "an", "or", "for", "in", "is", "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't", "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by", "can't", "cannot", "could",
@@ -19,7 +19,7 @@ class QuestionLogic {
         ".", ",", "[", "]", "|", "\"", "'", "{", "}", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "+", "=", "<", ">", "~", "`", "\\", "/", "?", ";", ":"
     };
 
-    static String[] removeStopWords(String input) {
+    public static String[] removeStopWords(String input) {
         String output;
         String[] words = input.split(" ");
         StringBuilder outputBuilder = new StringBuilder();
@@ -43,14 +43,15 @@ class QuestionLogic {
         return output.split(" ");
     }
 
-    static LinkedList<Integer> findBestMatchLogic(String text, int id, int bestMatchWordAmount, String originalInput, String[] inputNoStopWords) {
-        LinkedList<Integer> arrayOutput = null;
+    public static LinkedList<Long> findBestMatchLogic(String text, long id, long bestMatchWordAmount, String originalInput, String[] inputNoStopWords) {
+        LinkedList<Long> arrayOutput = null;
+        text = text.toLowerCase();
         if (text.equals(originalInput)) {
             arrayOutput = new LinkedList<>();
             arrayOutput.add(id);
         } else {
             String[] thisNoStopWords = removeStopWords(text);
-            int thisWordAmount = 0;
+            long thisWordAmount = 0;
             for(String el : inputNoStopWords) {
                 if(Arrays.asList(thisNoStopWords).contains(el)){
                     thisWordAmount++;
@@ -61,7 +62,7 @@ class QuestionLogic {
                 }
             }
             if (thisWordAmount > bestMatchWordAmount) {
-                arrayOutput = new LinkedList<>();
+                arrayOutput = new LinkedList<Long>();
                 arrayOutput.add(id);
                 arrayOutput.add(thisWordAmount);
             }

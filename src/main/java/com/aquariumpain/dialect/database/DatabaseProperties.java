@@ -1,11 +1,11 @@
-package me.diax.dialect;
+package com.aquariumpain.dialect.database;
 
 import com.knockturnmc.api.util.NamedProperties;
 import com.knockturnmc.api.util.Property;
 
 import java.io.Serializable;
 
-final class DatabaseProperties extends NamedProperties implements Serializable {
+public final class DatabaseProperties extends NamedProperties implements Serializable {
 
     private static final long serialVersionUID = -2580963340292493348L;
 

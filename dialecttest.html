@@ -1,0 +1,75 @@
+<html>
+  <head>
+    <title>Dialect Test</title>
+    <style>
+    body {
+        /*text-align: center;*/
+        color: #FF6347;
+    }
+    </style>
+    <script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+  <script>
+    $.postJSON = function(url, data, callback) {
+      return jQuery.ajax({
+          'type': 'POST',
+          'url': url,
+          'contentType': 'application/json',
+          'data': JSON.stringify(data),
+          'dataType': 'text',
+          'success': callback,
+          'error': function (jqXHR, textStatus, errorThrown) {
+            console.log(jqXHR, textStatus, errorThrown);
+          }
+      });
+    };
+    $(function () {
+      var dialectRequestHandler = function () {
+        var inputText = $("#input").val().trim();
+        if (inputText == "") return;
+        $.postJSON("http://localhost:8181/dialect/api/chatbot/ask",
+        { "input": inputText },
+        function(data) {
+          var html = $("#response").html();
+          $("#response").html(html + '<br/><br><span style="color: #6A5ACD">Me: ' + inputText + "</span><br>Dialect: " + data);
+          $("#response").scrollTop($("#response").prop('scrollHeight'));
+          $("#input").val("");
+        });
+      };
+      $('#submit').click(dialectRequestHandler);
+      $("#input").keypress(function(e) {
+        if(e.which == 13) {
+          dialectRequestHandler();
+        }
+      });
+    });
+    $(function () {
+        var dialectRequestHandler = function () {
+          var inputText = $("#input-train").val().trim();
+          var outputText = $("#output-train").val().trim();
+          if (inputText == "" || outputText == "") return;
+          $.postJSON("http://localhost:8181/dialect/api/chatbot/train",
+          { "input": inputText, "output": outputText },
+          function(data) {
+            $("#input-train").val("");
+            $("#output-train").val("");
+          });
+        };
+        $('#submit-train').click(dialectRequestHandler);
+      });
+  </script>
+  </head>
+  <body>
+    <br>Conversation:<br>
+    <div id="response" style='width:50%; height:50%; overflow-y:scroll'>
+    </div>
+    <input type="text" name="input" id="input">
+    <input type="submit" value="Submit" id="submit">
+    <br><br><br>Train:<br>
+    <input type="text" name="inputtrain" id="input-train">
+    <input type="text" name="outputtrain" id="output-train">
+    <input type="submit" value="Submit" id="submit-train">
+  </body>
+</html>
